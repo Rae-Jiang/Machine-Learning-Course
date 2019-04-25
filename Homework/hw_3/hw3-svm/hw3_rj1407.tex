@@ -1,0 +1,316 @@
+
+
+\title{Homework 3: SVM and Sentiment Analysis}
+\author{rj1407 }
+\date{February 22, 2019}
+
+
+\documentclass[ruled]{article}
+\usepackage{courier}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[letterpaper]{geometry}
+\geometry{verbose}
+\usepackage{color}
+\usepackage{url}
+\usepackage{algorithm2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[unicode=true,
+ bookmarks=false,
+ breaklinks=false,pdfborder={0 0 1},backref=section,colorlinks=true]
+ {hyperref}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+\providecommand{\LyX}{\texorpdfstring%
+  {L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
+  {LyX}}
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
+ \newcommand{\code}[1]{\texttt{#1}}
+
+\@ifundefined{date}{}{\date{}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\makeatother
+
+\usepackage{listings}
+\lstset{backgroundcolor={\color{white}},
+basicstyle={\footnotesize\ttfamily},
+breakatwhitespace=false,
+breaklines=true,
+captionpos=b,
+commentstyle={\color{mygreen}},
+deletekeywords={...},
+escapeinside={\%*}{*)},
+extendedchars=true,
+frame=shadowbox,
+keepspaces=true,
+keywordstyle={\color{blue}},
+language=Python,
+morekeywords={*,...},
+numbers=none,
+numbersep=5pt,
+numberstyle={\tiny\color{mygray}},
+rulecolor={\color{black}},
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+stepnumber=1,
+stringstyle={\color{mymauve}},
+tabsize=2}
+\begin{document}
+\global\long\def\reals{\mathbf{R}}
+ \global\long\def\integers{\mathbf{Z}}
+\global\long\def\naturals{\mathbf{N}}
+ \global\long\def\rationals{\mathbf{Q}}
+\global\long\def\ca{\mathcal{A}}
+\global\long\def\cb{\mathcal{B}}
+ \global\long\def\cc{\mathcal{C}}
+ \global\long\def\cd{\mathcal{D}}
+\global\long\def\ce{\mathcal{E}}
+\global\long\def\cf{\mathcal{F}}
+\global\long\def\cg{\mathcal{G}}
+\global\long\def\ch{\mathcal{H}}
+\global\long\def\ci{\mathcal{I}}
+\global\long\def\cj{\mathcal{J}}
+\global\long\def\ck{\mathcal{K}}
+\global\long\def\cl{\mathcal{L}}
+\global\long\def\cm{\mathcal{M}}
+\global\long\def\cn{\mathcal{N}}
+\global\long\def\co{\mathcal{O}}
+\global\long\def\cp{\mathcal{P}}
+\global\long\def\cq{\mathcal{Q}}
+\global\long\def\calr{\mathcal{R}}
+\global\long\def\cs{\mathcal{S}}
+\global\long\def\ct{\mathcal{T}}
+\global\long\def\cu{\mathcal{U}}
+\global\long\def\cv{\mathcal{V}}
+\global\long\def\cw{\mathcal{W}}
+\global\long\def\cx{\mathcal{X}}
+\global\long\def\cy{\mathcal{Y}}
+\global\long\def\cz{\mathcal{Z}}
+\global\long\def\ind#1{1(#1)}
+\global\long\def\pr{\mathbb{P}}
+
+\global\long\def\ex{\mathbb{E}}
+\global\long\def\var{\textrm{Var}}
+\global\long\def\cov{\textrm{Cov}}
+\global\long\def\sgn{\textrm{sgn}}
+\global\long\def\sign{\textrm{sign}}
+\global\long\def\kl{\textrm{KL}}
+\global\long\def\law{\mathcal{L}}
+\global\long\def\eps{\varepsilon}
+\global\long\def\convd{\stackrel{d}{\to}}
+\global\long\def\eqd{\stackrel{d}{=}}
+\global\long\def\del{\nabla}
+\global\long\def\loss{\ell}
+\global\long\def\tr{\operatorname{tr}}
+\global\long\def\trace{\operatorname{trace}}
+\global\long\def\diag{\text{diag}}
+\global\long\def\rank{\text{rank}}
+\global\long\def\linspan{\text{span}}
+\global\long\def\proj{\text{Proj}}
+\global\long\def\argmax{\operatornamewithlimits{arg\, max}}
+\global\long\def\argmin{\operatornamewithlimits{arg\, min}}
+\global\long\def\bfx{\mathbf{x}}
+\global\long\def\bfy{\mathbf{y}}
+\global\long\def\bfl{\mathbf{\lambda}}
+\global\long\def\bfm{\mathbf{\mu}}
+\global\long\def\calL{\mathcal{L}}
+\global\long\def\vw{\boldsymbol{w}}
+\global\long\def\vx{\boldsymbol{x}}
+\global\long\def\vxi{\boldsymbol{\xi}}
+\global\long\def\valpha{\boldsymbol{\alpha}}
+\global\long\def\vbeta{\boldsymbol{\beta}}
+\global\long\def\vsigma{\boldsymbol{\sigma}}
+\global\long\def\vmu{\boldsymbol{\mu}}
+\global\long\def\vtheta{\boldsymbol{\theta}}
+\global\long\def\vd{\boldsymbol{d}}
+\global\long\def\vs{\boldsymbol{s}}
+\global\long\def\vt{\boldsymbol{t}}
+\global\long\def\vh{\boldsymbol{h}}
+\global\long\def\ve{\boldsymbol{e}}
+\global\long\def\vf{\boldsymbol{f}}
+\global\long\def\vg{\boldsymbol{g}}
+\global\long\def\vz{\boldsymbol{z}}
+\global\long\def\vk{\boldsymbol{k}}
+\global\long\def\va{\boldsymbol{a}}
+\global\long\def\vb{\boldsymbol{b}}
+\global\long\def\vv{\boldsymbol{v}}
+\global\long\def\vy{\boldsymbol{y}}
+
+
+\maketitle
+
+\section{Introduction}
+
+
+
+\section{Calculating Subgradients}
+
+
+\begin{enumerate}
+\item 
+\textbf{Solution:}
+$$\because g\in\partial f_{k}(x)$$
+$$f(z) \ge f_{k}(z) \ge f_{k}(x) + g^T(z - x) = f(x) + g^T (z - x)$$
+$$\therefore f(z) \ge f(x) + g^T (z - x), i.e. g\in\partial f(x)$$
+
+\item {[}Subgradient of hinge loss for linear prediction{]} Give a subgradient
+of
+\[
+J(w)=\max\left\{ 0,1-yw^{T}x\right\} .
+\]
+\\ \textbf{Solution:}
+a subgradient of $J(w)$ can be:
+\begin{equation}
+subgradient=\left\{
+\begin{aligned}
+0, 1 - yw^Tx <0\\
+\frac{-yx}{2}, else
+\end{aligned}
+\right.
+\end{equation}
+\end{enumerate}
+
+\section{Perceptron}
+
+\begin{enumerate}
+\item 
+\textbf{Solution:}\\
+If $\left\{ x\mid w^{T}x=0\right\} $ is a separating hyperplane
+for a training set $\cd=\left(\left(x_{1},y_{1}\right),\ldots,(x_{n},y_{n})\right)$, then we have \[
+y_{i}w^{T}x_{i}>0\;\forall i\in\left\{ 1,\ldots,n\right\} .
+\]
+\[-\hat{y_{i}}y_{i} = - w^{T}x_{i}y_{i} < 0.\]
+And we know loss function is:
+\[
+\ell(\hat{y},y)=\max\left\{ 0,-\hat{y}y\right\} .\]
+\[\therefore \ell(\hat{y},y)= 0; \forall i\in\left\{ 1,\ldots,n\right\}\]
+Therefore,the average perception loss on $D$ is $\frac{1}{n} \sum_{i}^n 0=$ 0.
+
+
+\item 
+\textbf{Solution:}\\
+From Problem 2 we know that a subgradient for perceptron loss can be:
+\begin{equation}
+subgradient=\left\{
+\begin{aligned}
+0, y_{i}w^Tx_{i} > 0\\
+\ -y_{i}x_{i}^T, else
+\end{aligned}
+\right.
+\end{equation}
+That is:
+\begin{align*}
+    & if (y_{i}w^Tx_{i} > 0):\\
+    & ~~~~w^{(k+1)}=w^{(k)}+0\\
+    & else:\\
+    & ~~~~w^{(k+1)}=w^{(k)}-1 \cdot (-x_{i}y_{i} )
+\end{align*}
+So the whole algorithm is as following:
+
+\begin{lyxcode}
+input:~Training~set~$\left(x_{1},y_{1}\right),\ldots,(x_{n},y_{n})\in\reals^{d}\times\left\{ -1,1\right\} $~\\
+$w^{(0)}=\left(0,\ldots,0\right)\in\reals^{d}$~\\
+$k=0$~\#~step~number~\\
+repeat~\\
+~~all\_correct~=~TRUE~\\
+~~for~$i=1,2,\ldots,n$~\#~loop~through~data~\\
+~~~~if~($y_{i}x_{i}^{T}w^{(k)}\le0$)~\\
+~~~~~~$w^{(k+1)}=w^{(k)}+x_{i}y_{i}$~\\
+~~~~~~all\_correct~=~FALSE~\\
+~~~~else~\\
+~~~~~~$w^{(k+1)}=w^{(k)}$~\\
+~~~~end~if~\\
+~~~~$k=k+1$~\\
+~~end~for~\\
+until~(all\_correct~==~TRUE)~\\
+return~$w^{(k)}$~\\
+\end{lyxcode}
+It's the exactly the same we are doing in the Perceptron Algorithm.
+
+
+
+\item 
+\textbf{Solution:}\\
+In Perceptron algorithm, for each step, it either update with $w^{(k+1)}=w^{(k)}+y_{i}x_{i}$ or keep it unchanged, so we can write $w=\sum_{i=1}^{n}\alpha_{i}x_{i}$, where $\alpha_{1},\ldots,\alpha_{n} = 0$(if $y_{i}x_{i}^{T}w^{(k)}\ge0$) or else $y_{i}$\\
+Points$(x_{i}, y_{i})$ that are support vectors should satisfy: $ y_{i}x_{i}^{T}w^{(k)}\le0,$
+which means they are misclassified.
+\end{enumerate}
+
+\section{The Data}
+
+
+\section{Sparse Representations}
+
+
+\section{Support Vector Machine via Pegasos}
+
+\begin{enumerate}
+
+\item 
+\textbf{Solution:}\\
+When $1-y_{i}w^{T}x_{i}=0, i.e.y_{i}w^{T}x_{i}=1, J_{i}(w)$ is not differentiable, the gradient is not defined\\
+Else, it's defined,$\because \frac{\lambda}{2}\|w\|^{2}$ and $\max\left\{ 0,1-y_{i}w^{T}x_{i}\right\}$ are  convex functions,\\
+$\therefore$ the gradient of $J_{i}(w) = {\left\{
+\begin{aligned}
+\lambda w, y_{i}w^T x_{i} > 1\\
+\lambda w - y_{i}x_{i}, else
+\end{aligned}\right.}$
+
+\item 
+\textbf{Solution:}\\
+
+$\because \frac{\lambda}{2}\|w\|^{2}$ and $\max\left\{ 0,1-y_{i}w^{T}x_{i}\right\}$ are  convex functions,
+and when $y_{i}w^{T}x_{i}\ge1$,  $J_{i}(w)=\frac{\lambda}{2}\|w\|^{2}$, when $y_{i}w^{T}x_{i}<1$,$J_{i}(w)=\frac{\lambda}{2}\|w\|^{2}+\max\left\{ 0,1-y_{i}w^{T}x_{i}\right\}$
+$\therefore$ similar to previous questions,
+\begin{eqnarray*}
+g & = & \begin{cases}
+\lambda w-y_{i}x_{i} & \mbox{for }y_{i}w^{T}x_{i}<1\\
+\lambda w & \mbox{for}y_{i}w^{T}x_{i}\ge1.
+\end{cases}
+\end{eqnarray*}
+
+
+\item {[}Written{]} Show that if your step size rule is $\eta_{t}=1/\left(\lambda t\right)$,
+then doing SGD with the subgradient direction from the previous problem
+is the same as given in the pseudocode. \\
+\\\textbf{Solution:}\\
+when step size rule is $\eta_{t}=1/\left(\lambda t\right)$,$w$ is updated as:
+\begin{eqnarray*}
+w_{t+1} & = & \begin{cases}
+w_{t} -\eta_{t}(\lambda w_{t}-y_{i}x_{i}) & \mbox{for }y_{i}w^{T}x_{i}<1\\
+w_{t} -\eta_{t}(\lambda w_{t})  & \mbox{for }y_{i}w^{T}x_{i}\ge1.
+\end{cases}
+\end{eqnarray*}
+That is,
+\begin{eqnarray*}
+w_{t+1} & = & \begin{cases}
+(1-\eta_{t}\lambda)w_{t}+\eta_{t}y_{i}x_{i} & \mbox{for }y_{i}w^{T}x_{i}<1\\
+(1-\eta_{t}\lambda)w_{t}  & \mbox{for }y_{i}w^{T}x_{i}\ge1.
+\end{cases}
+\end{eqnarray*}
+So it's the same as given in pseudocode.
+
+\end{enumerate}
+
+\end{document}
